@@ -1,0 +1,21 @@
+{
+  "folders": [
+    {
+      "path": "./services/backend"
+    },
+    {
+      "path": "./services/backoffice"
+    },
+    {
+      "path": "./"
+    }
+  ],
+  "settings": {
+    "monorepoWorkspace.includeRoot": true,
+    "jest.disabledWorkspaceFolders": [
+      "backend",
+      "models",
+      "backoffice"
+    ]
+  }
+}

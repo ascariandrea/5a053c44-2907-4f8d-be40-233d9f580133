@@ -1,0 +1,31 @@
+version: "3.7"
+
+services:
+
+  db-test:
+    image: postgres:14
+    ports:
+      - "127.0.0.1:9432:5432"
+    environment:
+      POSTGRES_USER: weroad-test
+      POSTGRES_PASSWORD: weroad-test-password
+      POSTGRES_DB: weroad-test
+    volumes:
+      - db-test-data:/var/lib/postgresql/data
+
+  db:
+    image: postgres:14
+    ports:
+      - "8432:5432"
+    expose:
+      - "8432"
+    environment:
+      POSTGRES_USER: weroad-test
+      POSTGRES_PASSWORD: weroad-test-password
+      POSTGRES_DB: weroad-test
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+volumes:
+  db-data: {}
+  db-test-data: {}

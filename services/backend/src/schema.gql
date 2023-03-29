@@ -1,0 +1,45 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type AuthGQL {
+  sub: ID!
+  token: String!
+  permissions: [String!]!
+}
+
+type TravelGQL {
+  id: String!
+  name: String!
+}
+
+type Query {
+  getTravels(skip: Int = 0, take: Int = 20): [TravelGQL!]!
+  getTravelById(id: String!): TravelGQL!
+}
+
+type Mutation {
+  loginUser(loginData: LoginUserInput!): AuthGQL!
+  createTravel(travelData: CreateTravelData!): TravelGQL!
+}
+
+input LoginUserInput {
+  username: String!
+  password: String!
+}
+
+input CreateTravelData {
+  name: String!
+  slug: String!
+  description: String!
+  numberOfDays: Float!
+  moods: TravelMoodsInput!
+}
+
+input TravelMoodsInput {
+  nature: Float!
+  relax: Float!
+  history: Float!
+  culture: Float!
+  party: Float!
+}

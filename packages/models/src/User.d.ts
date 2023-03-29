@@ -1,0 +1,48 @@
+import * as t from "io-ts";
+export declare const TRAVEL_READ: t.LiteralC<"travel:read">;
+export type TRAVEL_READ = t.TypeOf<typeof TRAVEL_READ>;
+export declare const TRAVEL_WRITE: t.LiteralC<"travel:write">;
+export type TRAVEL_WRITE = t.TypeOf<typeof TRAVEL_WRITE>;
+export declare const TRAVEL_DEL: t.LiteralC<"travel:delete">;
+export type TRAVEL_DEL = t.TypeOf<typeof TRAVEL_DEL>;
+export declare const TRAVEL_ALL: t.LiteralC<"travel:*">;
+export type TRAVEL_ALL = t.TypeOf<typeof TRAVEL_ALL>;
+export declare const TOUR_READ: t.LiteralC<"tour:read">;
+export type TOUR_READ = t.TypeOf<typeof TOUR_READ>;
+export declare const TOUR_WRITE: t.LiteralC<"tour:write">;
+export type TOUR_WRITE = t.TypeOf<typeof TOUR_WRITE>;
+export declare const TOUR_DEL: t.LiteralC<"tour:delete">;
+export type TOUR_DEL = t.TypeOf<typeof TOUR_DEL>;
+export declare const TOUR_ALL: t.LiteralC<"tour:*">;
+export type TOUR_ALL = t.TypeOf<typeof TOUR_ALL>;
+export declare const USER_READ: t.LiteralC<"user:read">;
+export type USER_READ = t.TypeOf<typeof USER_READ>;
+export declare const USER_WRITE: t.LiteralC<"user:write">;
+export type USER_WRITE = t.TypeOf<typeof USER_WRITE>;
+export declare const USER_DEL: t.LiteralC<"user:delete">;
+export type USER_DEL = t.TypeOf<typeof USER_DEL>;
+export declare const USER_ALL: t.LiteralC<"user:*">;
+export type USER_ALL = t.TypeOf<typeof USER_ALL>;
+export declare const UserPermission: t.UnionC<[t.LiteralC<"travel:read">, t.LiteralC<"travel:write">, t.LiteralC<"travel:delete">, t.LiteralC<"travel:*">, t.LiteralC<"tour:read">, t.LiteralC<"tour:write">, t.LiteralC<"tour:delete">, t.LiteralC<"tour:*">, t.LiteralC<"user:read">, t.LiteralC<"user:write">, t.LiteralC<"user:delete">, t.LiteralC<"user:*">]>;
+export type UserPermission = t.TypeOf<typeof UserPermission>;
+export declare const LoginUserBody: t.ExactC<t.TypeC<{
+    username: t.StringC;
+    password: t.StringC;
+}>>;
+export type LoginUserBody = t.TypeOf<typeof LoginUserBody>;
+export declare const CreateUserBody: t.ExactC<t.TypeC<{
+    email: t.StringC;
+    permissions: t.ArrayC<t.UnionC<[t.LiteralC<"travel:read">, t.LiteralC<"travel:write">, t.LiteralC<"travel:delete">, t.LiteralC<"travel:*">, t.LiteralC<"tour:read">, t.LiteralC<"tour:write">, t.LiteralC<"tour:delete">, t.LiteralC<"tour:*">, t.LiteralC<"user:read">, t.LiteralC<"user:write">, t.LiteralC<"user:delete">, t.LiteralC<"user:*">]>>;
+    username: t.StringC;
+    password: t.StringC;
+}>>;
+export type CreateUserBody = t.TypeOf<typeof CreateUserBody>;
+export declare const User: t.ExactC<t.TypeC<{
+    id: t.BrandC<t.StringC, import("io-ts-types/lib/UUID").UUIDBrand>;
+    createdAt: import("io-ts-types/lib/DateFromISOString").DateFromISOStringC;
+    updatedAt: import("io-ts-types/lib/DateFromISOString").DateFromISOStringC;
+    email: t.StringC;
+    permissions: t.ArrayC<t.UnionC<[t.LiteralC<"travel:read">, t.LiteralC<"travel:write">, t.LiteralC<"travel:delete">, t.LiteralC<"travel:*">, t.LiteralC<"tour:read">, t.LiteralC<"tour:write">, t.LiteralC<"tour:delete">, t.LiteralC<"tour:*">, t.LiteralC<"user:read">, t.LiteralC<"user:write">, t.LiteralC<"user:delete">, t.LiteralC<"user:*">]>>;
+    username: t.StringC;
+}>>;
+export type User = t.TypeOf<typeof User>;

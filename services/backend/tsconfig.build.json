@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "baseUrl": "./src",
+    "rootDir": "./"
+  },
+  "include": ["./src", "mikro-orm.config.ts", "./typings"],
+  "exclude": ["node_modules", "bin", "test", "dist", "**/*spec.ts", "*.ts"]
+}
