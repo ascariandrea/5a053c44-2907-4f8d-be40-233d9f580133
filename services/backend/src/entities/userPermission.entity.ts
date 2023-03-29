@@ -5,7 +5,7 @@ import {
   Property,
   Unique,
 } from '@mikro-orm/core';
-import { User } from '../models';
+import { User } from '@weroad-test/models/lib';
 import { BaseEntity } from './base.entity';
 import { UserEntity } from './user.entity';
 
@@ -17,9 +17,4 @@ export class UserPermissionEntity extends BaseEntity {
 
   @ManyToMany(() => UserEntity)
   users = new Collection<UserEntity>(this);
-
-  constructor(role: User.UserPermission) {
-    super();
-    this.permission = role;
-  }
 }

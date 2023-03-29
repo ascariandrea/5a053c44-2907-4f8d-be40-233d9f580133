@@ -69,6 +69,24 @@
       "schema": "public",
       "indexes": [
         {
+          "columnNames": [
+            "email"
+          ],
+          "composite": false,
+          "keyName": "user_email_unique",
+          "primary": false,
+          "unique": true
+        },
+        {
+          "columnNames": [
+            "username"
+          ],
+          "composite": false,
+          "keyName": "user_username_unique",
+          "primary": false,
+          "unique": true
+        },
+        {
           "keyName": "user_email_username_unique",
           "columnNames": [
             "email",
@@ -162,12 +180,12 @@
         },
         "moods": {
           "name": "moods",
-          "type": "varchar(255)",
+          "type": "jsonb",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": false,
-          "mappedType": "string"
+          "mappedType": "json"
         },
         "user_id": {
           "name": "user_id",
@@ -212,8 +230,7 @@
           "referencedColumnNames": [
             "id"
           ],
-          "referencedTableName": "public.user",
-          "updateRule": "cascade"
+          "referencedTableName": "public.user"
         }
       }
     },
@@ -269,16 +286,6 @@
           "length": 6,
           "mappedType": "datetime"
         },
-        "ending_date": {
-          "name": "ending_date",
-          "type": "timestamptz(0)",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "length": 6,
-          "mappedType": "datetime"
-        },
         "price": {
           "name": "price",
           "type": "int",
@@ -301,6 +308,15 @@
       "name": "tour",
       "schema": "public",
       "indexes": [
+        {
+          "keyName": "tour_name_unique",
+          "columnNames": [
+            "name"
+          ],
+          "composite": false,
+          "primary": false,
+          "unique": true
+        },
         {
           "keyName": "tour_pkey",
           "columnNames": [
@@ -394,6 +410,71 @@
       ],
       "checks": [],
       "foreignKeys": {}
+    },
+    {
+      "columns": {
+        "user_entity_id": {
+          "name": "user_entity_id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "uuid"
+        },
+        "user_permission_entity_id": {
+          "name": "user_permission_entity_id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "uuid"
+        }
+      },
+      "name": "user_permissions",
+      "schema": "public",
+      "indexes": [
+        {
+          "keyName": "user_permissions_pkey",
+          "columnNames": [
+            "user_entity_id",
+            "user_permission_entity_id"
+          ],
+          "composite": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "user_permissions_user_entity_id_foreign": {
+          "constraintName": "user_permissions_user_entity_id_foreign",
+          "columnNames": [
+            "user_entity_id"
+          ],
+          "localTableName": "public.user_permissions",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "public.user",
+          "deleteRule": "cascade",
+          "updateRule": "cascade"
+        },
+        "user_permissions_user_permission_entity_id_foreign": {
+          "constraintName": "user_permissions_user_permission_entity_id_foreign",
+          "columnNames": [
+            "user_permission_entity_id"
+          ],
+          "localTableName": "public.user_permissions",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "public.user_permission",
+          "deleteRule": "cascade",
+          "updateRule": "cascade"
+        }
+      }
     },
     {
       "columns": {

@@ -11,7 +11,6 @@ const decodeOrThrow =
     const te = decode(d);
     if (te._tag === 'Left') {
       const failures = failure(te.left);
-      console.log('failures', failures);
       throw toError(failures);
     }
     return te.right;

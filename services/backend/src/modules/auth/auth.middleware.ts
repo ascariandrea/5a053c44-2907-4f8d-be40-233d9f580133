@@ -1,8 +1,8 @@
 import {
-HttpException,
-HttpStatus,
-Injectable,
-NestMiddleware,
+  HttpException,
+  HttpStatus,
+  Injectable,
+  NestMiddleware,
 } from '@nestjs/common';
 import { NextFunction, Request, Response } from 'express';
 import * as jwt from 'jsonwebtoken';
@@ -22,8 +22,6 @@ export class AuthMiddleware implements NestMiddleware {
     res: Response,
     next: NextFunction,
   ) {
-    console.log('use auth middleware', req.headers.authorization);
-
     const authHeaders = req.headers.authorization;
     if (authHeaders && (authHeaders as string).split(' ')[1]) {
       const token = (authHeaders as string).split(' ')[1];

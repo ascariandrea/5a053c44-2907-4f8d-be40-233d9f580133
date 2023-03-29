@@ -1,8 +1,10 @@
-import { Entity, ManyToOne, Property } from '@mikro-orm/core';
+import { Entity, ManyToOne, Property, Unique } from '@mikro-orm/core';
 import { BaseEntity } from './base.entity';
 import { TravelEntity } from './travel.entity';
+import { addDays } from 'date-fns';
 
 @Entity({ tableName: 'tour' })
+@Unique({ properties: ['name'] })
 export class TourEntity extends BaseEntity {
   @Property()
   name: string;
@@ -10,27 +12,15 @@ export class TourEntity extends BaseEntity {
   @Property()
   startingDate: Date;
 
-  @Property()
-  endingDate: Date;
+  @Property({ persist: false })
+  get endingDate() {
+    return addDays(this.startingDate, this.travel.numberOfDays);
+  }
 
   @Property()
   price: number;
 
-  @ManyToOne(() => TravelEntity)
+  @ManyToOne({ entity: () => TravelEntity, eager: true })
   travel: TravelEntity;
 
-  constructor(
-    name: string,
-    startingDate: Date,
-    endingDate: Date,
-    price: number,
-    travel: TravelEntity,
-  ) {
-    super();
-    this.name = name;
-    this.startingDate = startingDate;
-    this.endingDate = endingDate;
-    this.price = price;
-    this.travel = travel;
-  }
 }

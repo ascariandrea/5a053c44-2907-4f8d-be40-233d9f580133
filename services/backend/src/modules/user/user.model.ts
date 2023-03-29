@@ -1,15 +1,14 @@
-import { Field, ObjectType } from '@nestjs/graphql';
+import { Field, ID, ObjectType } from '@nestjs/graphql';
+import { UUID } from 'io-ts-types/lib/UUID';
 
 @ObjectType()
 export class UserGQL {
-  @Field()
-  id: string;
+  @Field(() => ID)
+  id: UUID;
 
   @Field()
   username: string;
 
-  constructor(id: string, username: string) {
-    this.id = id;
-    this.username = username;
-  }
+  @Field(() => [String])
+  permissions: string[];
 }

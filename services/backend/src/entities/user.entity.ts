@@ -1,4 +1,5 @@
 import {
+  Cascade,
   Collection,
   Entity,
   ManyToMany,
@@ -13,28 +14,41 @@ import { UserPermissionEntity } from './userPermission.entity';
 @Entity({ tableName: 'user' })
 @Unique({ properties: ['email', 'username'] })
 export class UserEntity extends BaseEntity {
-  @Property()
+  @Property({ nullable: false })
+  @Unique()
   email: string;
 
-  @Property()
+  @Property({ nullable: false })
+  @Unique()
   username: string;
 
-  @Property()
+  @Property({ nullable: false, hidden: true })
   password: string;
 
-  @ManyToMany(() => UserPermissionEntity, 'users', {
-    eager: false,
-    cascade: undefined,
+  @ManyToMany({
+    entity: () => UserPermissionEntity,
+    inversedBy: 'users',
+    eager: true,
+    lazy: false,
+    cascade: [Cascade.ALL],
   })
   permissions = new Collection<UserPermissionEntity>(this);
 
-  @OneToMany(() => TravelEntity, (t) => t.user, { eager: true })
+  @OneToMany({
+    entity: () => TravelEntity,
+    mappedBy: 'user',
+    eager: false,
+    cascade: [],
+    lazy: true,
+  })
   travels = new Collection<TravelEntity>(this);
 
-  constructor(email: string, username: string, password: string) {
-    super();
-    this.email = email;
-    this.username = username;
-    this.password = password;
-  }
+  // @OneToMany({
+  //   entity: () => TourEntity,
+  //   mappedBy: 'participant',
+  //   eager: false,
+  //   cascade: [],
+  //   lazy: true,
+  // })
+  // tours = new Collection<TourEntity>(this);
 }

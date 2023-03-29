@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "target": "ES5",
+    "declaration": true,
+    "moduleResolution": "nodenext",
+    "composite": true,
+    "outDir": "./lib",
+    "baseUrl": "./src",
+    "rootDir": "./src",
+    "tsBuildInfoFile": "lib/.tsbuildinfo"
+  },
+  "include": ["./src"]
+}

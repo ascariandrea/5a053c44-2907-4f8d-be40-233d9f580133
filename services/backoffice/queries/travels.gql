@@ -1,0 +1,74 @@
+query getTravelBySlug($slug: String!) {
+  getTravelBySlug(slug: $slug) {
+    id
+    name
+    slug
+    description
+    numberOfDays
+    moods {
+      nature
+      party
+      history
+      culture
+      relax
+    }
+    creator {
+      id
+      username
+    }
+
+    tours {
+      price
+    }
+  }
+}
+
+query getTravels($skip: Int = 0, $take: Int = 20) {
+  getTravels(skip: $skip, take: $take) {
+    total
+    edges {
+      node {
+        id
+        name
+        slug
+        description
+        numberOfDays
+        moods {
+          nature
+          history
+          relax
+          party
+          culture
+        }
+      }
+    }
+  }
+}
+
+mutation createTravel($travelData: CreateTravelData!) {
+  createTravel(travelData: $travelData) {
+    id
+    name
+    slug
+  }
+}
+
+mutation editTravel($travelId: String!, $travelData: EditTravelData!) {
+  editTravel(travelId: $travelId, travelData: $travelData) {
+    id
+    slug
+    description
+    numberOfDays
+    moods {
+      nature
+      history
+      culture
+      party
+      relax
+    }
+    creator {
+      id
+      username
+    }
+  }
+}

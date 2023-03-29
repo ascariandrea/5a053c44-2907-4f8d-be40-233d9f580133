@@ -1,9 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-import { UserEntity } from '../../entities';
 import { UserService } from '../user/user.service';
 import { ConfigService } from '@nestjs/config';
+import { AuthGQL } from './auth.model';
 
 @Injectable()
 export class AuthService {
@@ -13,11 +13,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async validateUser(
-    username: string,
-    password: string,
-  ): Promise<UserEntity | null> {
-    console.log('validate user');
+  async login(username: string, password: string): Promise<AuthGQL | null> {
     const user = await this.userService.getUser({ username });
     if (!user) {
       return null;
@@ -25,23 +21,33 @@ export class AuthService {
 
     const passwordValid = await bcrypt.compare(password, user.password);
     if (user && passwordValid) {
-      return user;
+      await user.permissions.init();
+      const payload = {
+        username: user.username,
+        sub: user.id,
+        permissions: user.permissions.getItems().map((d) => d.permission),
+      };
+
+      return {
+        ...payload,
+        token: this.jwtService.sign(payload, {
+          secret: this.configService.get<string>('JWT_SECRET'),
+        }),
+      };
     }
     return null;
   }
 
-  async login(user: UserEntity) {
-    await user.permissions.init();
-    const payload = {
-      username: user.username,
-      sub: user.id,
-      permissions: user.permissions.getItems().map((d) => d.permission),
-    };
+  async validateUser(payload: any) {
+    const user = await this.userService.getUser({
+      id: payload.sub,
+      username: payload.username,
+    });
 
-    return {
-      accessToken: this.jwtService.sign(payload, {
-        secret: this.configService.get<string>('JWT_SECRET'),
-      }),
-    };
+    if (!user) {
+      throw new NotFoundException(`User does not exist`);
+    }
+
+    return user;
   }
 }

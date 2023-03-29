@@ -1,6 +1,6 @@
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { User } from '../../models/index';
+import { User } from '@weroad-test/models/lib';
 import { UserPermissionEntity } from '../../entities/userPermission.entity';
 import { UUID } from 'io-ts-types/lib/UUID';
 import { UserEntity } from '../../entities';
@@ -8,6 +8,7 @@ import { decodeOrThrow } from '../../utils/fp.util';
 import { UserRepository } from './user.repository';
 import { UserPermRepository } from './userPerm.repository';
 import { hash } from '../../utils/hash.utils';
+import { FilterQuery, FindOptions } from '@mikro-orm/core';
 
 const userDecoder = decodeOrThrow(User.User.decode, (e) => {
   return new HttpException(
@@ -38,6 +39,13 @@ export class UserService {
           User.USER_ALL.value,
         ].includes(p.permission as any),
       );
+  }
+
+  async getUsers(
+    filter: FilterQuery<UserEntity>,
+    opts?: FindOptions<UserEntity>,
+  ): Promise<UserEntity[]> {
+    return this.userRepo.find(filter, opts);
   }
 
   async getUser(filter: Partial<UserEntity>): Promise<UserEntity | null> {

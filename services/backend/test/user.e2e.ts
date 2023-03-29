@@ -1,16 +1,19 @@
 import { MikroOrmModule } from '@mikro-orm/nestjs';
+import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { INestApplication } from '@nestjs/common';
-import { JwtModule } from '@nestjs/jwt';
+import { GraphQLModule } from '@nestjs/graphql';
 import { Test } from '@nestjs/testing';
+import { User } from '@weroad-test/models/lib';
+import { CreateUserBody } from '@weroad-test/models/src/User';
 import * as fc from 'fast-check';
 import * as jwt from 'jsonwebtoken';
+import * as path from 'path';
 import * as request from 'supertest';
 import { v4 } from 'uuid';
-import { getConfig } from '../mikro-orm.config';
-import { User } from '../src/models';
+import { getConfig } from '../src/mikro-orm.config';
 import { UserModule } from '../src/modules/user/user.module';
 import { UserService } from '../src/modules/user/user.service';
-import { CreateUserBodyArb } from './arbitraries/user.abitrary';
+import { CreateUserBodyArb } from './arbitraries/user.arbitrary';
 
 describe('CRUD /users', () => {
   let app: INestApplication,
@@ -22,20 +25,16 @@ describe('CRUD /users', () => {
   beforeAll(async () => {
     const module = await Test.createTestingModule({
       imports: [
-        // ConfigModule.forRoot({
-        //   envFilePath: path.resolve(process.cwd(), '.env.test'),
-        // }),
-        JwtModule.register({
-          secret: process.env.JWT_SECRET,
-          signOptions: {
-            expiresIn: '120s',
-          },
-        }),
         MikroOrmModule.forRoot({
           ...getConfig(),
           allowGlobalContext: true,
         }),
         UserModule,
+        GraphQLModule.forRoot<ApolloDriverConfig>({
+          driver: ApolloDriver,
+          path: 'graphql',
+          autoSchemaFile: path.join(process.cwd(), 'src/schema.gql'),
+        }),
       ],
     }).compile();
 
@@ -70,98 +69,170 @@ describe('CRUD /users', () => {
     await app.close();
   });
 
-  describe('/login', () => {
+  describe('loginUser', () => {
+    const getLoginQuery = (username: string, password: string) => `
+    mutation {
+      loginUser(loginData: { 
+        username: "${username}" 
+        password: "${password}"
+      }) {
+        token
+        sub
+        permissions
+      }
+    }`;
+
     it('should receive a 404 error when `username` is not found', async () => {
-      await request(app.getHttpServer())
-        .post('/users/login')
-        .send({
-          username: admin.username + '-wrong',
-          password: adminPassword,
-        })
-        .expect(404);
+      const query = getLoginQuery(admin.username + '-wrong', adminPassword);
+
+      const r = await request(app.getHttpServer()).post('/graphql').send({
+        query,
+      });
+
+      expect(r.status).toBe(200);
+      expect(r.body.errors[0]).toMatchObject({
+        message: `Cannot find user ${admin.username}-wrong`,
+      });
     });
 
     it('should receive a 404 error when `password` mismatch', async () => {
-      await request(app.getHttpServer())
-        .post('/users/login')
+      const r = await request(app.getHttpServer())
+        .post('/graphql')
         .send({
-          username: admin.username,
-          password: editorPassword,
-        })
-        .expect(404);
+          query: getLoginQuery(admin.username, editorPassword),
+        });
+
+      expect(r.status).toBe(200);
+      expect(r.body.errors[0]).toMatchObject({
+        message: `Cannot find user ${admin.username}`,
+      });
     });
 
     it('should receive a 200 error when `username` and `password`  match', async () => {
-      await request(app.getHttpServer())
-        .post('/users/login')
+      const r = await request(app.getHttpServer())
+        .post('/graphql')
         .send({
-          username: admin.username,
-          password: adminPassword,
-        })
-        .expect(201);
+          query: getLoginQuery(admin.username, adminPassword),
+        });
 
-      await request(app.getHttpServer())
-        .post('/users/login')
+      expect(r.status).toBe(200);
+      expect(r.body.data).toMatchObject({
+        loginUser: {
+          sub: admin.id,
+          permissions: admin.permissions,
+          token: expect.any(String),
+        },
+      });
+
+      const r2 = await request(app.getHttpServer())
+        .post('/graphql')
         .send({
-          username: editor.username,
-          password: editorPassword,
+          query: getLoginQuery(editor.username, editorPassword),
         })
-        .expect(201);
+        .expect(200);
+
+      expect(r2.body.data).toMatchObject({
+        loginUser: {
+          sub: editor.id,
+          permissions: editor.permissions,
+          token: expect.any(String),
+        },
+      });
     });
   });
-  describe('/', () => {
-    it('should receive a 401 error when no `Authorization` header is missing', async () => {
-      const r = await request(app.getHttpServer()).post('/users').send({});
 
-      expect(r.status).toBe(401);
+  describe('createUser', () => {
+    const getCreateUserQuery = (u: CreateUserBody) => `
+      mutation {
+        createUser(userData: {
+          username: "${u.username}"
+          email: "${u.email}"
+          password: "${u.password}"
+          permissions: [${u.permissions.map((p) => `"${p}"`)}],
+        }) {
+          id
+          username
+          permissions
+        }
+      }
+    `;
+
+    it('should receive a 401 error when `Authorization` header is missing', async () => {
+      const [data] = fc.sample(CreateUserBodyArb, 1);
+      const query = getCreateUserQuery(data);
+
+      const r = await request(app.getHttpServer()).post('/graphql').send({
+        query,
+      });
+
+      expect(r.status).toBe(200);
+      expect(r.body.errors[0]).toMatchObject({ message: `Unauthorized` });
     });
 
     it('should receive a 404 when `Authorization` token contains an invalid user id', async () => {
       const authToken = jwt.sign(
-        { ...editor, id: v4() },
+        { sub: v4(), username: admin.username, permissions: admin.permissions },
         process.env.JWT_SECRET,
       );
       const data = fc.sample(CreateUserBodyArb, 1)[0];
-      await request(app.getHttpServer())
-        .post('/users')
-        .set('Authorization', `Token ${authToken}`)
-        .send(data)
-        .expect(404);
+      const query = getCreateUserQuery(data);
+      const r = await request(app.getHttpServer())
+        .post('/graphql')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({ query });
+
+      expect(r.status).toBe(200);
+      expect(r.body.errors[0]).toMatchObject({
+        message: `User does not exist`,
+      });
     });
 
     it('should receive a 403 error when `Authorization` token has insufficient permissions', async () => {
-      const authToken = jwt.sign(editor, process.env.JWT_SECRET);
+      const authToken = jwt.sign(
+        {
+          sub: editor.id,
+          username: editor.username,
+          permissions: editor.permissions,
+        },
+        process.env.JWT_SECRET,
+      );
 
       const data = fc.sample(CreateUserBodyArb, 1)[0];
 
+      const query = getCreateUserQuery(data);
       const r = await request(app.getHttpServer())
-        .post('/users')
-        .set('Authorization', `Token ${authToken}`)
-        .send(data)
-        .expect(403);
+        .post('/graphql')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({ query })
+        .expect(200);
 
-      expect(r.body).toMatchObject({ message: 'Forbidden resource' });
+      expect(r.body.errors[0]).toMatchObject({ message: 'Forbidden resource' });
     });
 
     it('should create an "editor" user from an "admin" user', async () => {
-      const authToken = jwt.sign(admin, process.env.JWT_SECRET);
+      const authToken = jwt.sign(
+        {
+          sub: admin.id,
+          username: admin.username,
+          permissions: admin.permissions,
+        },
+        process.env.JWT_SECRET,
+      );
 
       const data = fc.sample(CreateUserBodyArb, 1).map((u) => ({
         ...u,
         permissions: [User.TRAVEL_ALL.value, User.TOUR_ALL.value],
       }))[0];
 
+      const query = getCreateUserQuery(data);
       const r = await request(app.getHttpServer())
-        .post('/users')
-        .set('Authorization', `Token ${authToken}`)
-        .send(data)
-        .expect(201);
+        .post('/graphql')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({ query })
+        .expect(200);
 
-      expect(r.body).toHaveProperty('id');
-      expect(r.body).toHaveProperty('createdAt');
-      expect(r.body).toHaveProperty('updatedAt');
-      expect(r.body).toMatchObject({
-        email: data.email,
+      expect(r.body.errors).toBe(undefined);
+      expect(r.body.data.createUser).toMatchObject({
         username: data.username,
         permissions: data.permissions,
       });

@@ -1,0 +1,23 @@
+query getUser {
+  getUser {
+    id
+    username
+    permissions
+  }
+}
+
+query getUsers($username: String, $skip: Int = 0, $take: Int = 20) {
+  getUsers(username: $username, skip: $skip, take: $take) {
+    id
+    username
+    permissions
+  }
+}
+
+mutation loginUser($loginData: LoginUserInput!) {
+  loginUser(loginData: $loginData) {
+    username
+    permissions
+    token
+  }
+}

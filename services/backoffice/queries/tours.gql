@@ -1,0 +1,46 @@
+query getTours(
+  $travelId: ID!
+  $skip: Int = 0
+  $take: Int = 20
+  $name: String
+  $startingDate: String
+) {
+  getTours(
+    travelId: $travelId
+    skip: $skip
+    take: $take
+    name: $name
+    startingDate: $startingDate
+  ) {
+    total
+    edges {
+      node {
+        id
+        name
+        price
+        startingDate
+        endingDate
+      }
+    }
+  }
+}
+
+mutation createTour($tourData: CreateTourData!) {
+  createTour(tourData: $tourData) {
+    id
+    name
+    price
+    startingDate
+    endingDate
+  }
+}
+
+mutation deleteTour($tourId: String!) {
+  deleteTour(tourId: $tourId) {
+    id
+    name
+    price
+    startingDate
+    endingDate
+  }
+}

@@ -1,7 +1,7 @@
 import { MikroORM } from '@mikro-orm/postgresql';
 import { getConfig } from '../mikro-orm.config';
 import { UserEntity, UserPermissionEntity } from '../src/entities';
-import { User } from '../src/models';
+import { User } from '@weroad-test/models/lib';
 import * as dotenv from 'dotenv';
 import { hash } from '../src/utils/hash.utils';
 

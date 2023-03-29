@@ -1,0 +1,12 @@
+{
+  "extends": "./.nuxt/tsconfig.json",
+  "compilerOptions": {
+    "typeRoots": ["../../node_modules/@types", "node_modules/@types", "typings"]
+  },
+  "exclude": ["node_modules", ".nuxt", "dist"],
+  "references": [
+    {
+      "path": "../../packages/models"
+    }
+  ]
+}

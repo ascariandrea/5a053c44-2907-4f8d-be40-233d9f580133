@@ -22,7 +22,7 @@ import { JwtStrategy } from './jwt.strategy';
       inject: [ConfigService],
     }),
   ],
-  providers: [ConfigService, JwtService, AuthService, JwtStrategy],
+  providers: [ConfigService, JwtService, JwtStrategy, AuthService],
   exports: [ConfigService, JwtService, AuthService],
 })
 export class AuthModule {}

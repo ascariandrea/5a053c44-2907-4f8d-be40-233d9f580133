@@ -1,8 +1,8 @@
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { User } from '../../models';
-import { UserEntity } from '../../entities';
+import { User } from '@weroad-test/models/lib';
 import { ROLES_KEY } from './permission.decorator';
+import { GqlExecutionContext } from '@nestjs/graphql';
 
 @Injectable()
 export class PermissionsGuard implements CanActivate {
@@ -12,15 +12,14 @@ export class PermissionsGuard implements CanActivate {
     const requiredRoles = this.reflector.getAllAndOverride<
       User.UserPermission[]
     >(ROLES_KEY, [context.getHandler(), context.getClass()]);
-    // console.log({ requiredRoles });
     if (!requiredRoles) {
-      return true;
+      return false;
     }
-    const { user } = context.switchToHttp().getRequest() as {
-      user: UserEntity;
-    };
-    // console.log('permission check for user', user);
-    const perms = user.permissions.getItems().map((r) => r.permission);
+    const { user } = GqlExecutionContext.create(context).getContext().req;
+
+    const userPerms = user.permissions.getItems();
+
+    const perms = userPerms.map((r: any) => r.permission);
 
     return requiredRoles.some((role) => perms.includes(role));
   }

@@ -23,6 +23,11 @@
     "./src",
     "./test",
     "./jest.*.ts",
-    "mikro-orm.config.ts"
+    "jest-spec.config.ts"
+  ],
+  "references": [
+    {
+      "path": "../../packages/models"
+    }
   ]
 }

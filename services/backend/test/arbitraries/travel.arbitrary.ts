@@ -1,29 +1,29 @@
-import { Travel } from '../../src/models';
+import { Travel } from '@weroad-test/models/lib';
 import * as fc from 'fast-check';
 import { UUIDArb } from './uuid.arbitrary';
+import { RandomWordArb } from './random-word.arbitrary';
+import { addYears } from 'date-fns';
 
 export const CreateTravelBodyArb: fc.Arbitrary<Travel.CreateTravelBody> =
   fc.record({
-    slug: fc
-      .string({ minLength: 5, maxLength: 40 })
-      .chain((slug) => UUIDArb.map((uuid) => `${slug}-${uuid}`)),
-    name: fc.string({ minLength: 5, maxLength: 40 }),
-    description: fc.string({ minLength: 50, maxLength: 400 }),
-    numberOfDays: fc.integer(),
+    name: RandomWordArb({ joinChar: ' ', count: 6 }),
+    slug: RandomWordArb({ count: 6 }),
+    description: fc.lorem(),
+    numberOfDays: fc.nat({ max: 100 }),
     moods: fc.record({
-      nature: fc.integer(),
-      relax: fc.integer(),
-      culture: fc.integer(),
-      party: fc.integer(),
-      history: fc.integer(),
+      nature: fc.nat({ max: 10 }),
+      relax: fc.nat({ max: 10 }),
+      culture: fc.nat({ max: 10 }),
+      party: fc.nat({ max: 10 }),
+      history: fc.nat({ max: 10 }),
     }),
   });
 
 export const TravelArb: fc.Arbitrary<Travel.Travel> = fc
   .record({
     id: UUIDArb,
-    createdAt: fc.date(),
-    updatedAt: fc.date(),
+    createdAt: fc.date({ min: new Date(), max: addYears(new Date(), 10) }),
+    updatedAt: fc.date({ min: new Date(), max: addYears(new Date(), 10) }),
     creator: fc.record({}) as fc.Arbitrary<any>,
   })
   .chain((u) => CreateTravelBodyArb.map((b) => ({ ...b, ...u })));

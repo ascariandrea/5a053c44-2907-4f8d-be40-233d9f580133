@@ -1,13 +1,15 @@
 import {
+  Cascade,
   Collection,
   Entity,
   EntityRepositoryType,
   ManyToOne,
   OneToMany,
   Property,
+  Ref,
   Unique,
 } from '@mikro-orm/core';
-import { Travel } from '../models';
+import { Travel } from '@weroad-test/models/lib';
 import { TravelRepository } from '../modules/travel/travel.repository';
 import { BaseEntity } from './base.entity';
 import { TourEntity } from './tour.entity';
@@ -21,13 +23,13 @@ import { UserEntity } from './user.entity';
 export class TravelEntity extends BaseEntity {
   [EntityRepositoryType]?: TravelRepository;
 
-  @Property()
+  @Property({ nullable: false })
   slug: string;
 
-  @Property()
+  @Property({ nullable: false })
   name: string;
 
-  @Property()
+  @Property({ nullable: false })
   description: string;
 
   @Property({ type: 'int' })
@@ -36,26 +38,19 @@ export class TravelEntity extends BaseEntity {
   @Property({ type: 'json' })
   moods: Travel.Travel['moods'];
 
-  @OneToMany(() => TourEntity, (t) => t.travel, { cascade: undefined })
+  @OneToMany({
+    entity: () => TourEntity,
+    mappedBy: 'travel',
+    eager: false,
+    cascade: [Cascade.PERSIST],
+  })
   tours = new Collection<TourEntity>(this);
 
-  @ManyToOne(() => UserEntity)
+  @ManyToOne({
+    entity: () => UserEntity,
+    eager: true,
+    cascade: [],
+    inversedBy: 'travels',
+  })
   user: UserEntity;
-
-  constructor(
-    slug: string,
-    name: string,
-    description: string,
-    numberOfDays: number,
-    moods: any,
-    user: UserEntity,
-  ) {
-    super();
-    this.slug = slug;
-    this.name = name;
-    this.description = description;
-    this.numberOfDays = numberOfDays;
-    this.moods = moods;
-    this.user = user;
-  }
 }
