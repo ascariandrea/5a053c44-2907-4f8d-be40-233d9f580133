@@ -11,7 +11,6 @@ import { GqlAuthGuard } from '../auth/gql-jwt-auth.guard';
 import { PermissionsGuard } from '../permissions/permissions.guard';
 import { User } from '@weroad-test/models/lib';
 import { UUID } from 'io-ts-types/lib/UUID';
-import { parse } from 'date-fns';
 
 @Resolver(() => TourGQL)
 export class TourResolver {

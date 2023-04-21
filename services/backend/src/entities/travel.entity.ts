@@ -6,7 +6,6 @@ import {
   ManyToOne,
   OneToMany,
   Property,
-  Ref,
   Unique,
 } from '@mikro-orm/core';
 import { Travel } from '@weroad-test/models/lib';

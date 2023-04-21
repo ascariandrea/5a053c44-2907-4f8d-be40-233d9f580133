@@ -29,7 +29,6 @@ describe('CRUD tours', () => {
     travelService: TravelService,
     userService: UserService,
     tourPlanner: User.User,
-    editor: User.User,
     admin: User.User;
   const travelIds: string[] = [],
     tourIds: string[] = [];

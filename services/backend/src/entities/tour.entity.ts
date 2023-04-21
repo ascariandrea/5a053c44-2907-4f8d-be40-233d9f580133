@@ -22,5 +22,4 @@ export class TourEntity extends BaseEntity {
 
   @ManyToOne({ entity: () => TravelEntity, eager: true })
   travel: TravelEntity;
-
 }

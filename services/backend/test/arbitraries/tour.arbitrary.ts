@@ -20,6 +20,7 @@ export const CreateTourBodyArb = (
   });
 
 export const TourArb = (opts: TourArbOpts): fc.Arbitrary<Tour.Tour> =>
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   CreateTourBodyArb(opts).chain(({ travelId, ...b }) =>
     fc
       .record({
